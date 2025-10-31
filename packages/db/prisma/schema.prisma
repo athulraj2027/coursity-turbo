@@ -33,12 +33,16 @@ model User {
   studentProfile  StudentProfile?
   teacherProfile  TeacherProfile?
   adminProfile    AdminProfile? 
+
+  participants    Participant[] 
 }
 
 model StudentProfile {
   id              String            @id @default(uuid())
   userId          String            @unique
   user            User              @relation(fields: [userId], references: [id])
+
+   enrollments     Enrollment[]
 }
 
 model TeacherProfile {
@@ -49,6 +53,8 @@ model TeacherProfile {
   experience      Int?
   verifyStatus    Boolean           @default(false)
   user            User              @relation(fields: [userId], references: [id])
+
+  courses         Course[]
 }
 
 model AdminProfile {
@@ -64,4 +70,62 @@ model Otp {
   expiresAt  DateTime
   verified   Boolean  @default(false)
   createdAt  DateTime @default(now())
+}
+
+
+model Course {
+  id              String            @id @default(uuid())
+  name            String            @unique
+  description     String
+  price           Int
+  startDate       DateTime        
+  numberOfClasses Int
+  totalHours      Int           
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  teacherId       String
+  teacher         TeacherProfile    @relation(fields: [teacherId], references: [id])
+  enrollments     Enrollment[]
+  lectures        Lecture[]       
+}
+
+
+model Enrollment {
+  id              String            @id @default(uuid())
+  studentId       String
+  courseId        String
+  status          EnrollmentStatus  @default(ACTIVE)
+  enrolledAt      DateTime          @default(now())
+  student         StudentProfile    @relation(fields: [studentId], references: [id])
+  course          Course            @relation(fields: [courseId], references: [id])
+}
+  
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Lecture {
+  id              String          @id @default(uuid())
+  courseId        String
+  title           String
+  startTime       DateTime
+  endTime         DateTime?
+  meetingId       String?         @unique
+  course          Course          @relation(fields: [courseId], references: [id])
+  participants    Participant[]   // ✅ linked via relation below
+}
+
+model Participant {
+  id              String          @id @default(uuid())
+  userId          String          
+  lectureId       String
+  role            Role
+  joinTime        DateTime        @default(now())
+  leaveTime       DateTime?       // optional because user might still be connected
+
+  user            User            @relation(fields: [userId], references: [id])
+  lecture         Lecture         @relation(fields: [lectureId], references: [id])
 }
