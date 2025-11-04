@@ -31,12 +31,7 @@ router.get(
 
 // student routes
 
-router.get(
-  "/:id",
-  authenticate,
-  authorize("TEACHER", "STUDENT"),
-  lecturesController.getLectureById
-);
+router.get("/:id", authenticate, lecturesController.getLectureById);
 router.get(
   "/upcoming",
   authenticate,

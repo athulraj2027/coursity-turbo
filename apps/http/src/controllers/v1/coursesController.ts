@@ -191,7 +191,7 @@ const createCourse = async (req: Request, res: Response) => {
       });
     }
 
-    const teacherId = req.user.teacherProfileId;
+    const teacherId = req.user!.teacherProfileId;
 
     if (!teacherId) {
       return res.status(403).json({
@@ -316,32 +316,241 @@ const updateCourseById = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Failed to update course",
-      error:,
+      error
     });
   }
   
 };
 
 const deleteCourseById = async (req: Request, res: Response) => {
-  try {
-  } catch (error) {}
+ try {
+    const { id } = req.params;
+
+    // Only teachers can delete their own courses, unless admin
+    const course = await prisma.course.findUnique({ where: { id } });
+    if (!course) return res.status(404).json({ message: "Course not found" });
+
+    if (req.user?.role === "TEACHER" && course.teacherId !== req.user.teacherProfileId) {
+      return res.status(403).json({ message: "You can only delete your own courses" });
+    }
+
+    await prisma.course.delete({ where: { id } });
+    return res.status(200).json({ message: "Course deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error", error });
+  }
 };
 
-const getMyCoursesForTeachers = async (req: Request, res: Response) => {
+export const getMyCoursesForTeachers = async (req: Request, res: Response) => {
   try {
-  } catch (error) {}
+    // 1️⃣ Ensure user is authenticated
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    // 2️⃣ Ensure user is a teacher
+    if (req.user.role !== "TEACHER") {
+      return res.status(403).json({ message: "Access denied. Teachers only." });
+    }
+
+    // 3️⃣ Get pagination params (optional)
+    const page = parseInt((req.query.page as string) || "1", 10);
+    const limit = parseInt((req.query.limit as string) || "10", 10);
+    const skip = (page - 1) * limit;
+
+    // 4️⃣ Get teacher's profile ID (from token or DB)
+    const teacherProfileId = req.user.teacherProfileId;
+    if (!teacherProfileId) {
+      return res.status(400).json({ message: "Teacher profile not found" });
+    }
+
+    // 5️⃣ Fetch teacher's courses
+    const [courses, total] = await Promise.all([
+      prisma.course.findMany({
+        where: { teacherId: teacherProfileId },
+        skip,
+        take: limit,
+        include: {
+          _count: { select: { enrollments: true, lectures: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.course.count({ where: { teacherId: teacherProfileId } }),
+    ]);
+
+    // 6️⃣ Send response
+    return res.status(200).json({
+      total,
+      page,
+      limit,
+      courses,
+    });
+  } catch (error) {
+    console.error("Error fetching teacher courses:", error);
+    return res.status(500).json({
+      message: "Server error while fetching courses",
+      error,
+    });
+  }
 };
 
 //student routes
-const enrollCourseById = async (req: Request, res: Response) => {
+export const enrollCourseById = async (req: Request, res: Response) => {
   try {
-  } catch (error) {}
+    // 1️⃣ Ensure the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    // 2️⃣ Ensure the user is a student
+    if (req.user.role !== "STUDENT") {
+      return res.status(403).json({ message: "Only students can enroll in courses" });
+    }
+
+    const { id: courseId } = req.params;
+
+    // 3️⃣ Ensure the course exists
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: { teacher: true },
+    });
+
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // 4️⃣ Get student profile
+    const studentProfile = await prisma.studentProfile.findUnique({
+      where: { userId: req.user.id },
+    });
+
+    if (!studentProfile) {
+      return res.status(400).json({ message: "Student profile not found" });
+    }
+
+    // 5️⃣ Check if already enrolled
+    const existingEnrollment = await prisma.enrollment.findFirst({
+      where: {
+        courseId,
+        studentId: studentProfile.id,
+      },
+    });
+
+    if (existingEnrollment) {
+      return res.status(400).json({ message: "Already enrolled in this course" });
+    }
+
+    // 6️⃣ Create the enrollment record
+    const enrollment = await prisma.enrollment.create({
+      data: {
+        studentId: studentProfile.id,
+        courseId,
+        status: "ACTIVE",
+      },
+    });
+
+    return res.status(201).json({
+      message: "Enrolled successfully",
+      enrollment,
+    });
+  } catch (error) {
+    console.error("Error enrolling in course:", error);
+    return res.status(500).json({
+      message: "Server error during enrollment",
+      error,
+    });
+  }
 };
 
-const getEnrolledCoursesForStudents = async (req: Request, res: Response) => {
+
+export const getEnrolledCoursesForStudents = async (req: Request, res: Response) => {
   try {
-  } catch (error) {}
+    // 1️⃣ Authentication check
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    // 2️⃣ Role check
+    if (req.user.role !== "STUDENT") {
+      return res.status(403).json({ message: "Only students can view enrolled courses" });
+    }
+
+    // 3️⃣ Get student profile
+    const studentProfile = await prisma.studentProfile.findUnique({
+      where: { userId: req.user.id },
+    });
+
+    if (!studentProfile) {
+      return res.status(400).json({ message: "Student profile not found" });
+    }
+
+    // 4️⃣ Pagination support
+    const page = parseInt((req.query.page as string) || "1", 10);
+    const limit = parseInt((req.query.limit as string) || "10", 10);
+    const skip = (page - 1) * limit;
+
+    // 5️⃣ Fetch enrolled courses with course + teacher info
+    const [enrollments, total] = await Promise.all([
+      prisma.enrollment.findMany({
+        where: { studentId: studentProfile.id },
+        skip,
+        take: limit,
+        include: {
+          course: {
+            include: {
+              teacher: {
+                include: {
+                  user: {
+                    select: { username: true, email: true },
+                  },
+                },
+              },
+              _count: { select: { lectures: true, enrollments: true } },
+            },
+          },
+        },
+        orderBy: { enrolledAt: "desc" },
+      }),
+      prisma.enrollment.count({ where: { studentId: studentProfile.id } }),
+    ]);
+
+    // 6️⃣ Response formatting
+    const formattedCourses = enrollments.map((enrollment) => ({
+      enrollmentId: enrollment.id,
+      status: enrollment.status,
+      enrolledAt: enrollment.enrolledAt,
+      course: {
+        id: enrollment.course.id,
+        name: enrollment.course.name,
+        description: enrollment.course.description,
+        price: enrollment.course.price,
+        numberOfClasses: enrollment.course.numberOfClasses,
+        totalHours: enrollment.course.totalHours,
+        lecturesCount: enrollment.course._count.lectures,
+        enrollmentsCount: enrollment.course._count.enrollments,
+        teacher: {
+          name: enrollment.course.teacher.user.username,
+          email: enrollment.course.teacher.user.email,
+        },
+      },
+    }));
+
+    return res.status(200).json({
+      total,
+      page,
+      limit,
+      courses: formattedCourses,
+    });
+  } catch (error) {
+    console.error("Error fetching enrolled courses:", error);
+    return res.status(500).json({
+      message: "Server error while fetching enrolled courses",
+      error,
+    });
+  }
 };
+
 export default {
   getAllCourses,
   getCourseById,

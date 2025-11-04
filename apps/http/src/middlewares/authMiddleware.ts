@@ -1,8 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
+export interface AuthUser {
+  id: string;
+  role: string;
+  email: string;
+  teacherProfileId?: string;
+  studentProfileId?: string;
+}
+
 export interface AuthRequest extends Request {
-  user?: { id: string; role: string; email: string };
+  user?: AuthUser;
 }
 
 export const authenticate = (
@@ -16,11 +24,7 @@ export const authenticate = (
 
   const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: string;
-      role: string;
-      email: string;
-    };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthUser;
     req.user = decoded;
     next();
   } catch (error) {

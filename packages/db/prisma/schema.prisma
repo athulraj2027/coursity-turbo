@@ -21,6 +21,12 @@ enum Role{
   STUDENT
 }
 
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+
 model User { 
   id              String            @id @default(uuid())
   username        String
@@ -35,6 +41,8 @@ model User {
   adminProfile    AdminProfile? 
 
   participants    Participant[] 
+  createdCoupons  Coupon[]          @relation("CreatedCoupons")
+  redemptions     CouponRedemption[]
 }
 
 model StudentProfile {
@@ -88,6 +96,8 @@ model Course {
   teacher         TeacherProfile    @relation(fields: [teacherId], references: [id])
   enrollments     Enrollment[]
   lectures        Lecture[]       
+  coupons        Coupon[]  
+  redemptions     CouponRedemption[]
 }
 
 
@@ -128,4 +138,37 @@ model Participant {
 
   user            User            @relation(fields: [userId], references: [id])
   lecture         Lecture         @relation(fields: [lectureId], references: [id])
+}
+
+model Coupon {
+  id             String      @id @default(uuid())
+  code           String      @unique                // e.g., "COURSITY50"
+  description    String?
+  discountType   DiscountType                      // PERCENTAGE or FIXED
+  discountValue  Int                               // e.g., 20 means 20% or ₹20 depending on type
+  maxUses        Int?                              // null = unlimited
+  usedCount      Int           @default(0)
+  expiresAt      DateTime
+  deletedAt      DateTime?
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+
+  // Relations
+  courseId       String?                           // Optional (null = can apply to any course)
+  course         Course?       @relation(fields: [courseId], references: [id])
+  createdBy      User?         @relation("CreatedCoupons", fields: [createdById], references: [id])
+  createdById    String?
+  redemptions    CouponRedemption[]                // track usage
+}
+
+model CouponRedemption {
+  id         String     @id @default(uuid())
+  couponId   String
+  userId     String
+  courseId   String?
+  redeemedAt DateTime   @default(now())
+
+  coupon     Coupon     @relation(fields: [couponId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+  course     Course?    @relation(fields: [courseId], references: [id])
 }
