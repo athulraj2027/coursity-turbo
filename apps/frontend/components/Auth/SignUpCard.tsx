@@ -13,9 +13,13 @@ import { Input } from "../ui/input";
 import { Label } from "@radix-ui/react-label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { validateSignupForm } from "@/lib/validation";
+import { signupUser } from "@/lib/api";
+import { useSignupStore } from "@/store/signupStore";
 
 const SignUpCard = () => {
   const router = useRouter();
+  const { setSignupData } = useSignupStore();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +29,30 @@ const SignUpCard = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validationError = validateSignupForm({
+      username,
+      email,
+      password,
+      confirmPassword,
+    });
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    try {
+      setLoading(true);
+      const data = await signupUser(email);
+      setSignupData({ username, email, password });
+      console.log("✅ Email sent successfully:", data);
+      router.push(`/verify-otp`);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
     <Card className="w-full max-w-sm tracking-tighter">
       <CardHeader>
@@ -43,7 +70,6 @@ const SignUpCard = () => {
                 id="username"
                 type="text"
                 placeholder="yourname123"
-                required
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
@@ -53,7 +79,6 @@ const SignUpCard = () => {
                 id="email"
                 type="email"
                 placeholder="m@example.com"
-                required
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
@@ -64,8 +89,7 @@ const SignUpCard = () => {
               <Input
                 id="password"
                 type="password"
-                placeholder="**** ****"
-                required
+                placeholder="********"
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
@@ -76,14 +100,14 @@ const SignUpCard = () => {
               <Input
                 id="password"
                 type="password"
-                placeholder="**** ****"
-                required
+                placeholder="********"
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
           </div>
-          <Button type="submit" className="w-full mt-3">
-            Sign up
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+          <Button type="submit" className="w-full mt-3" disabled={loading}>
+            {loading ? "Creating..." : "Sign up"}
           </Button>
         </form>
       </CardContent>

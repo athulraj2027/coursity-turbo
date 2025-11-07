@@ -1,14 +1,29 @@
-import { z } from "zod";
-export const signUpSchema = z
-  .object({
-    username: z.string().min(3, "Username must be at least 3 characters"),
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be atleast 6 characters"),
-    confirmPassword: z.string().min(6, "Confirm your password"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+export interface SignupFormData {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
 
-export type signUpSchema = z.infer<typeof signUpSchema>;
+export const validateSignupForm = (data: SignupFormData): string | null => {
+  const { username, email, password, confirmPassword } = data;
+
+  if (!username.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+    return "All fields are required.";
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return "Please enter a valid email address.";
+  }
+
+  if (password.length < 6) {
+    return "Password must be at least 6 characters long.";
+  }
+
+  if (password !== confirmPassword) {
+    return "Passwords do not match.";
+  }
+
+  return null; // ✅ no error
+};

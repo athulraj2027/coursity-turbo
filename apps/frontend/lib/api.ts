@@ -1,0 +1,41 @@
+export const signupUser = async (email: string) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/send-otp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await res.json();
+  console.log(data);
+  if (!res.ok) {
+    throw new Error(data.message || "Sending email failed.");
+  }
+
+  return data;
+};
+
+export const verifyOtp = async (
+  otp: string,
+  email: string,
+  password: string,
+  role: string,
+  username: string
+) => {
+  console.log(otp);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-otp`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp, password, role, username }),
+    }
+  );
+
+  const data = await res.json();
+  console.log(data);
+  if (!res.ok) {
+    throw new Error(data.message || "OTP verification failed.");
+  }
+
+  return data;
+};

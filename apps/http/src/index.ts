@@ -1,7 +1,7 @@
-
 import dotenv from "dotenv";
 import "dotenv/config";
 import path from "path";
+import cors from "cors";
 // 1️⃣ Load shared env (root)
 dotenv.config();
 
@@ -16,7 +16,13 @@ import v1Routes from "./routes/v1/index";
 const app = express();
 const PORT = 4000;
 
-
+app.use(
+  cors({
+    origin: ["http://localhost:3000"], // your Next.js frontend
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true, // if you plan to send cookies or auth headers
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

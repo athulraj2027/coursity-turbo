@@ -20,14 +20,22 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { useSignupStore } from "@/store/signupStore";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { verifyOtp } from "@/lib/api";
 
 const FormSchema = z.object({
-  pin: z.string().min(6, {
-    message: "Your one-time password must be 6 characters.",
+  pin: z.string().regex(/^\d{6}$/, {
+    message: "Your OTP must be exactly 6 digits.",
   }),
 });
 
 export function InputOTPForm() {
+  const { username, email, password, role, clearSignupData } = useSignupStore();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -35,14 +43,18 @@ export function InputOTPForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    toast("You submitted the following values", {
-      description: (
-        <pre className="mt-2 w-[320px] rounded-md bg-neutral-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    try {
+      setLoading(true);
+      const res = await verifyOtp(data.pin, username, email, password, role);
+      console.log("Account verified");
+      clearSignupData();
+      router.push(`/${role.toLowerCase()}`);
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -55,14 +67,16 @@ export function InputOTPForm() {
             <FormItem>
               <FormLabel>One-Time Password</FormLabel>
               <FormControl>
-                <InputOTP maxLength={6} {...field}>
+                <InputOTP
+                  maxLength={6}
+                  {...field}
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                >
                   <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
+                    {[...Array(6)].map((_, i) => (
+                      <InputOTPSlot key={i} index={i} />
+                    ))}
                   </InputOTPGroup>
                 </InputOTP>
               </FormControl>
@@ -73,8 +87,10 @@ export function InputOTPForm() {
             </FormItem>
           )}
         />
-
-        <Button type="submit">Submit</Button>
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+        <Button type="submit" disabled={loading}>
+          {loading ? "Verifying..." : "Verify"}
+        </Button>
       </form>
     </Form>
   );

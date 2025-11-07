@@ -76,7 +76,7 @@ const verifyOtp = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    if (role !== "TEACHER" || role !== "STUDENT")
+    if (role !== "TEACHER" && role !== "STUDENT")
       return res.status(403).json({ message: "Invalid role" });
 
     const newUser = await prisma.user.create({
@@ -84,9 +84,9 @@ const verifyOtp = async (req: Request, res: Response) => {
     });
 
     if (role === "TEACHER") {
-      await prisma.studentProfile.create({ data: { userId: newUser.id } });
-    } else if (role === "STUDENT") {
       await prisma.teacherProfile.create({ data: { userId: newUser.id } });
+    } else if (role === "STUDENT") {
+      await prisma.studentProfile.create({ data: { userId: newUser.id } });
     }
 
     await prisma.otp.delete({ where: { id: verifiedOTP.id } });
@@ -122,7 +122,8 @@ const login = async (req: Request, res: Response) => {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(400).json({ message: "User not found" });
 
-    if (user.password !== password)
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid)
       return res.status(400).json({ message: "Invalid credentials" });
 
     const options: SignOptions = { expiresIn: "7d" };
