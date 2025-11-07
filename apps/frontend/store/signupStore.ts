@@ -13,8 +13,8 @@ export const useSignupStore = create<SignupData>((set) => ({
   username: "",
   email: "",
   password: "",
-  role: "STUDENT",
+  role: "",
   setSignupData: (data) => set((state) => ({ ...state, ...data })),
   clearSignupData: () =>
-    set({ username: "", email: "", password: "", role: "STUDENT" }),
+    set({ username: "", email: "", password: "", role: "" }),
 }));

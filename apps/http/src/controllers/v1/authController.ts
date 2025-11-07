@@ -72,6 +72,7 @@ const verifyOtp = async (req: Request, res: Response) => {
       where: { email, code: otp, expiresAt: { gt: new Date() } },
     });
 
+    console.log("req.body : ", req.body);
     if (!verifiedOTP) return res.status(400).json({ message: "Invalid OTP" });
 
     const hashedPassword = await bcrypt.hash(password, 10);

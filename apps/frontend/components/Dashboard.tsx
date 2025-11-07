@@ -18,7 +18,7 @@ interface SidebarDemoProps {
 
 export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
   const [open, setOpen] = useState(false);
-  
+
   const studentlinks = [
     {
       label: "Dashboard",
@@ -83,13 +83,13 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
         <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
-    {
-      label: "Logout",
-      href: "#",
-      icon: (
-        <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
+    // {
+    //   label: "Logout",
+    //   href: "#",
+    //   icon: (
+    //     <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+    //   ),
+    // },
   ];
 
   const teacherLinks = [
@@ -156,14 +156,6 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
         <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
-
-    {
-      label: "Logout",
-      href: "#",
-      icon: (
-        <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
   ];
 
   const adminLinks = [
@@ -209,19 +201,29 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
         <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
+  ];
+
+  const commonLinks = [
+   
     {
       label: "Logout",
       href: "#",
       icon: (
         <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
+      onClick: async (e?: React.MouseEvent) => {
+        e?.preventDefault();
+        await fetch("/api/logout", { method: "POST" });
+        window.location.href = "/sign-in";
+      },
     },
   ];
 
-  let links;
-  if (role === "student") links = studentlinks;
-  else if (role === "teacher") links = teacherLinks;
-  else if (role === "admin") links = adminLinks;
+  let links = [];
+
+  if (role === "student") links = [...studentlinks, ...commonLinks];
+  else if (role === "teacher") links = [...teacherLinks, ...commonLinks];
+  else if (role === "admin") links = [...adminLinks, ...commonLinks];
   else return;
 
   return (

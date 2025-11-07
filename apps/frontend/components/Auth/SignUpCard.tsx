@@ -16,12 +16,14 @@ import { useRouter } from "next/navigation";
 import { validateSignupForm } from "@/lib/validation";
 import { signupUser } from "@/lib/api";
 import { useSignupStore } from "@/store/signupStore";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 const SignUpCard = () => {
   const router = useRouter();
   const { setSignupData } = useSignupStore();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,6 +37,7 @@ const SignUpCard = () => {
       email,
       password,
       confirmPassword,
+      role,
     });
     if (validationError) {
       setError(validationError);
@@ -43,7 +46,7 @@ const SignUpCard = () => {
     try {
       setLoading(true);
       const data = await signupUser(email);
-      setSignupData({ username, email, password });
+      setSignupData({ username, email, password, role });
       console.log("✅ Email sent successfully:", data);
       router.push(`/verify-otp`);
     } catch (err: any) {
@@ -51,6 +54,10 @@ const SignUpCard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleChange = (value: string) => {
+    setRole(value);
   };
 
   return (
@@ -81,6 +88,24 @@ const SignUpCard = () => {
                 placeholder="m@example.com"
                 onChange={(e) => setEmail(e.target.value)}
               />
+            </div>
+            <div className="grid gap-1 text-gray-700">
+              <Label htmlFor="role">Role</Label>
+              <RadioGroup
+                value={role}
+                onValueChange={handleChange}
+                defaultValue=""
+                className="flex "
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="STUDENT" id="option-one" />
+                  <Label htmlFor="STUDENT">Student</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="TEACHER" id="TEACHER" />
+                  <Label htmlFor="TEACHER">Teacher</Label>
+                </div>
+              </RadioGroup>
             </div>
             <div className="grid gap-1">
               <div className="flex items-center">

@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import Cookies from "js-cookie";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -46,9 +47,10 @@ export function InputOTPForm() {
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
       setLoading(true);
-      const res = await verifyOtp(data.pin, username, email, password, role);
+      const res = await verifyOtp(data.pin, email, password, role, username);
       console.log("Account verified");
       clearSignupData();
+      Cookies.set("coursity_token", res.token);
       router.push(`/${role.toLowerCase()}`);
     } catch (error: any) {
       setError(error.message);
@@ -81,7 +83,8 @@ export function InputOTPForm() {
                 </InputOTP>
               </FormControl>
               <FormDescription>
-                Please enter the one-time password sent to your phone.
+                Please enter the one-time password sent to your phone. Do not
+                refresh the page.
               </FormDescription>
               <FormMessage />
             </FormItem>

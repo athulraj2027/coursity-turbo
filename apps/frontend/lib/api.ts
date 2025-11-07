@@ -21,13 +21,12 @@ export const verifyOtp = async (
   role: string,
   username: string
 ) => {
-  console.log(otp);
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-otp`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, otp, password, role, username }),
+      body: JSON.stringify({ otp, email, password, role, username }),
     }
   );
 
@@ -37,5 +36,20 @@ export const verifyOtp = async (
     throw new Error(data.message || "OTP verification failed.");
   }
 
+  return data;
+};
+
+export const signinUser = async (email: string, password: string) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await res.json();
+  console.log(data);
+  if (!res.ok) {
+    throw new Error(data.message || "Signin failed");
+  }
   return data;
 };
