@@ -181,19 +181,19 @@ const searchCourse = async (req: Request, res: Response) => {
 // teacher routes
 const createCourse = async (req: Request, res: Response) => {
   try {
-    const { name, description, price, startDate, numberOfClasses, totalHours } =
-      req.body;
+    const { name, description, price, date } = req.body;
 
-    if (!name || !description || !price || !startDate) {
+    const { id, role } = req.user!;
+    console.log("req.user : ", req.user);
+    if (!name || !description || !price || !date) {
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
       });
     }
 
-    const teacherId = req.user!.teacherProfileId;
-
-    if (!teacherId) {
+    // maybe we need to remove this
+    if (role !== "TEACHER") {
       return res.status(403).json({
         success: false,
         message: "Only teachers can create courses",
@@ -211,15 +211,22 @@ const createCourse = async (req: Request, res: Response) => {
       });
     }
 
+    const teacherProfile = await prisma.teacherProfile.findUnique({
+      where: { userId: id },
+    });
+
+    if (!teacherProfile)
+      return res.status(409).json({
+        success: false,
+        message: "User is not a teacher",
+      });
     const course = await prisma.course.create({
       data: {
         name,
         description,
         price: Number(price),
-        startDate: new Date(startDate),
-        numberOfClasses: Number(numberOfClasses) || 0,
-        totalHours: Number(totalHours) || 0,
-        teacherId,
+        startDate: new Date(date),
+        teacherId: teacherProfile.id,
       },
       include: {
         teacher: {
@@ -290,12 +297,6 @@ const updateCourseById = async (req: Request, res: Response) => {
         description: description ?? course.description,
         price: price !== undefined ? Number(price) : course.price,
         startDate: startDate ? new Date(startDate) : course.startDate,
-        numberOfClasses:
-          numberOfClasses !== undefined
-            ? Number(numberOfClasses)
-            : course.numberOfClasses,
-        totalHours:
-          totalHours !== undefined ? Number(totalHours) : course.totalHours,
       },
       include: {
         teacher: {
@@ -312,26 +313,30 @@ const updateCourseById = async (req: Request, res: Response) => {
       data: updatedCourse,
     });
   } catch (error) {
-     console.error("Error updating course:", error);
+    console.error("Error updating course:", error);
     res.status(500).json({
       success: false,
       message: "Failed to update course",
-      error
+      error,
     });
   }
-  
 };
 
 const deleteCourseById = async (req: Request, res: Response) => {
- try {
+  try {
     const { id } = req.params;
 
     // Only teachers can delete their own courses, unless admin
     const course = await prisma.course.findUnique({ where: { id } });
     if (!course) return res.status(404).json({ message: "Course not found" });
 
-    if (req.user?.role === "TEACHER" && course.teacherId !== req.user.teacherProfileId) {
-      return res.status(403).json({ message: "You can only delete your own courses" });
+    if (
+      req.user?.role === "TEACHER" &&
+      course.teacherId !== req.user.teacherProfileId
+    ) {
+      return res
+        .status(403)
+        .json({ message: "You can only delete your own courses" });
     }
 
     await prisma.course.delete({ where: { id } });
@@ -344,31 +349,22 @@ const deleteCourseById = async (req: Request, res: Response) => {
 
 export const getMyCoursesForTeachers = async (req: Request, res: Response) => {
   try {
-    // 1️⃣ Ensure user is authenticated
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-
-    // 2️⃣ Ensure user is a teacher
-    if (req.user.role !== "TEACHER") {
-      return res.status(403).json({ message: "Access denied. Teachers only." });
-    }
-
-    // 3️⃣ Get pagination params (optional)
+    const { id } = req.user;
     const page = parseInt((req.query.page as string) || "1", 10);
     const limit = parseInt((req.query.limit as string) || "10", 10);
     const skip = (page - 1) * limit;
 
     // 4️⃣ Get teacher's profile ID (from token or DB)
-    const teacherProfileId = req.user.teacherProfileId;
-    if (!teacherProfileId) {
+    const teacherProfile = await prisma.teacherProfile.findUnique({
+      where: { userId: id },
+    });
+    if (!teacherProfile)
       return res.status(400).json({ message: "Teacher profile not found" });
-    }
 
-    // 5️⃣ Fetch teacher's courses
+    console.log(teacherProfile);
     const [courses, total] = await Promise.all([
       prisma.course.findMany({
-        where: { teacherId: teacherProfileId },
+        where: { teacherId: teacherProfile.id },
         skip,
         take: limit,
         include: {
@@ -376,7 +372,7 @@ export const getMyCoursesForTeachers = async (req: Request, res: Response) => {
         },
         orderBy: { createdAt: "desc" },
       }),
-      prisma.course.count({ where: { teacherId: teacherProfileId } }),
+      prisma.course.count({ where: { teacherId: teacherProfile.id } }),
     ]);
 
     // 6️⃣ Send response
@@ -405,7 +401,9 @@ export const enrollCourseById = async (req: Request, res: Response) => {
 
     // 2️⃣ Ensure the user is a student
     if (req.user.role !== "STUDENT") {
-      return res.status(403).json({ message: "Only students can enroll in courses" });
+      return res
+        .status(403)
+        .json({ message: "Only students can enroll in courses" });
     }
 
     const { id: courseId } = req.params;
@@ -438,7 +436,9 @@ export const enrollCourseById = async (req: Request, res: Response) => {
     });
 
     if (existingEnrollment) {
-      return res.status(400).json({ message: "Already enrolled in this course" });
+      return res
+        .status(400)
+        .json({ message: "Already enrolled in this course" });
     }
 
     // 6️⃣ Create the enrollment record
@@ -463,8 +463,10 @@ export const enrollCourseById = async (req: Request, res: Response) => {
   }
 };
 
-
-export const getEnrolledCoursesForStudents = async (req: Request, res: Response) => {
+export const getEnrolledCoursesForStudents = async (
+  req: Request,
+  res: Response
+) => {
   try {
     // 1️⃣ Authentication check
     if (!req.user) {
@@ -473,7 +475,9 @@ export const getEnrolledCoursesForStudents = async (req: Request, res: Response)
 
     // 2️⃣ Role check
     if (req.user.role !== "STUDENT") {
-      return res.status(403).json({ message: "Only students can view enrolled courses" });
+      return res
+        .status(403)
+        .json({ message: "Only students can view enrolled courses" });
     }
 
     // 3️⃣ Get student profile

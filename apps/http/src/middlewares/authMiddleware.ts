@@ -18,16 +18,34 @@ export const authenticate = (
   res: Response,
   next: NextFunction
 ) => {
+  let token;
   const authHeader = req.headers.authorization;
-  if (!authHeader)
-    return res.status(401).json({ message: "No token provided" });
 
-  const token = authHeader.split(" ")[1];
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  }
+
+  console.log("cookies received   :",req.cookies);
+  // ✅ 2️⃣ If not found, look for cookie
+  if (!token && req.cookies) {
+    token = req.cookies["coursity_token"];
+  }
+
+  // ✅ 3️⃣ If still no token → reject
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  console.log("Token received for verification:", token);
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthUser;
     req.user = decoded;
+    console.log(req.user);
+    console.log("Authenticated user:", req.user);
     next();
   } catch (error) {
+    console.error("JWT Verification Error:", error);
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 };

@@ -9,6 +9,15 @@ import { generateOTP } from "../../utils/otp";
 import { sendEmail } from "../../helpers/mail";
 import { SignOptions } from "jsonwebtoken";
 
+const setAuthCookie = (res: Response, token: string) => {
+  res.cookie("coursity_token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // ✅ true only in production
+    sameSite: "lax", // ✅ needed for cross-origin (frontend :3000, backend :5000)
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+};
+
 const sendOtp = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
@@ -98,6 +107,8 @@ const verifyOtp = async (req: Request, res: Response) => {
       JWT_SECRET,
       options
     );
+
+    setAuthCookie(res, token);
     return res.json({
       message: "User created",
       user: {
@@ -134,6 +145,7 @@ const login = async (req: Request, res: Response) => {
       options
     );
 
+    setAuthCookie(res, token);
     return res.status(201).json({
       message: "Logged in successfully",
       user: { id: user.id, email: user.email, role: user.role },

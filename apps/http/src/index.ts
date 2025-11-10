@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import "dotenv/config";
 import path from "path";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+
 // 1️⃣ Load shared env (root)
 dotenv.config();
 
@@ -26,6 +28,7 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use("/api/v1", v1Routes);
 

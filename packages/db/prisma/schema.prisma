@@ -26,6 +26,13 @@ enum DiscountType {
   FIXED
 }
 
+enum LectureStatus{
+  NOT_STARTED
+  STARTED
+  CANCELLED
+  COMPLETED
+}
+
 
 model User { 
   id              String            @id @default(uuid())
@@ -86,9 +93,7 @@ model Course {
   name            String            @unique
   description     String
   price           Int
-  startDate       DateTime        
-  numberOfClasses Int
-  totalHours      Int           
+  startDate       DateTime              
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
@@ -122,7 +127,8 @@ model Lecture {
   courseId        String
   title           String
   startTime       DateTime
-  endTime         DateTime?
+  duration        Int
+  status          LectureStatus
   meetingId       String?         @unique
   course          Course          @relation(fields: [courseId], references: [id])
   participants    Participant[]   // ✅ linked via relation below

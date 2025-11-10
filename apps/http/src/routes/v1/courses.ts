@@ -6,7 +6,7 @@ const router = express.Router();
 //Public routes
 
 router.get("/", coursesController.getAllCourses);
-router.get("/:id", coursesController.getCourseById);
+
 router.get("/search", coursesController.searchCourse);
 
 //Teacher routes
@@ -16,18 +16,6 @@ router.post(
   authenticate,
   authorize("TEACHER"),
   coursesController.createCourse
-);
-router.put(
-  "/:id",
-  authenticate,
-  authorize("TEACHER"),
-  coursesController.updateCourseById
-);
-router.delete(
-  "/:id",
-  authenticate,
-  authorize("TEACHER"),
-  coursesController.deleteCourseById
 );
 router.get(
   "/my",
@@ -50,5 +38,19 @@ router.get(
   authorize("STUDENT"),
   coursesController.getEnrolledCoursesForStudents
 ); // for students
+
+router.get("/:id", coursesController.getCourseById);
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("TEACHER"),
+  coursesController.deleteCourseById
+);
+router.put(
+  "/:id",
+  authenticate,
+  authorize("TEACHER"),
+  coursesController.updateCourseById
+);
 
 export default router;

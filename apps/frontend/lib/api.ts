@@ -53,3 +53,44 @@ export const signinUser = async (email: string, password: string) => {
   }
   return data;
 };
+
+export const createCourse = async (
+  name: string,
+  description: string,
+  date: Date,
+  price: number
+) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name, description, date, price }),
+    credentials: "include",
+  });
+
+  const data = await res.json();
+  console.log(data);
+  if (!res.ok) {
+    throw new Error(data.message || "Course creation failed");
+  }
+  return data;
+};
+
+export const fetchMyCourses = async (page = 1, limit = 10) => {
+  console.log("Requesting:", `${process.env.NEXT_PUBLIC_API_URL}/courses/my?page=${page}&limit=${limit}`);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/courses/my?page=${page}&limit=${limit}`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
+  );
+
+  const data = await res.json();
+  console.log("data received : ", data);
+  if (!res.ok) {
+    throw new Error(data.message || "Fetching courses failed");
+  }
+  return data;
+};

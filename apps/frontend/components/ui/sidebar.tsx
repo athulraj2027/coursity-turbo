@@ -141,12 +141,12 @@ export const MobileSidebar = ({
               )}
             >
               <div
-                className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-neutral-200"
+                className="absolute right-10 top-10 z-50 text-neutral-800 flex-1 overflow-y-auto h-screen p-4 dark:text-neutral-200"
                 onClick={() => setOpen(!open)}
               >
                 <IconX />
               </div>
-              {children}
+              <div className="flex-1 overflow-y-auto h-screen">{children}</div>
             </motion.div>
           )}
         </AnimatePresence>

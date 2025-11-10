@@ -11,6 +11,13 @@ export interface SigninFormData {
   password: string;
 }
 
+export interface CreateCourseData {
+  name: string;
+  description: string;
+  price: number;
+  date: Date;
+}
+
 export const validateSignupForm = (data: SignupFormData): string | null => {
   const { username, email, password, confirmPassword, role } = data;
 
@@ -55,5 +62,43 @@ export const validateSigninForm = (data: SigninFormData): string | null => {
   if (password.length < 6)
     return "Password must be at least 6 characters long.";
 
+  return null;
+};
+
+export const validateCreateCourseForm = (
+  data: CreateCourseData
+): string | null => {
+  // 1️⃣ Basic field presence
+  if (!data.name || data.name.trim().length === 0)
+    return "Course name is required.";
+
+  if (!data.description || data.description.trim().length === 0)
+    return "Course description is required.";
+
+  if (!data.date) return "Course start date is required.";
+
+  if (data.price === undefined || data.price === null)
+    return "Course price is required.";
+
+  // 2️⃣ Length constraints
+  if (data.name.trim().length < 3)
+    return "Course name must be at least 3 characters long.";
+
+  if (data.description.trim().length < 10)
+    return "Course description must be at least 10 characters long.";
+
+  // 3️⃣ Price constraints
+  if (isNaN(data.price)) return "Course price must be a valid number.";
+
+  if (data.price < 0) return "Course price cannot be negative.";
+
+  // 4️⃣ Date validation
+  const startDate = new Date(data.date);
+  if (isNaN(startDate.getTime())) return "Invalid start date.";
+
+  const now = new Date();
+  if (startDate < now) return "Start date must be in the future.";
+
+  // ✅ All checks passed
   return null;
 };
