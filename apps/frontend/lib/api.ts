@@ -78,7 +78,10 @@ export const createCourse = async (
 };
 
 export const fetchMyCourses = async (page = 1, limit = 10) => {
-  console.log("Requesting:", `${process.env.NEXT_PUBLIC_API_URL}/courses/my?page=${page}&limit=${limit}`);
+  console.log(
+    "Requesting:",
+    `${process.env.NEXT_PUBLIC_API_URL}/courses/my?page=${page}&limit=${limit}`
+  );
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/courses/my?page=${page}&limit=${limit}`,
     {
@@ -92,5 +95,53 @@ export const fetchMyCourses = async (page = 1, limit = 10) => {
   if (!res.ok) {
     throw new Error(data.message || "Fetching courses failed");
   }
+  return data;
+};
+
+export const fetchCourseDetails = async (id: string) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${id}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Fetching courses failed");
+  }
+  return data;
+};
+
+export const createLecture = async (
+  courseId: string,
+  title: string,
+  time: string
+) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lectures`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ courseId, title, time }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Creating lecture failed");
+  }
+  return data;
+};
+
+export const fetchMyScheduledClasses = async () => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lectures/my`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "fetching lectures failed");
+  }
+
   return data;
 };

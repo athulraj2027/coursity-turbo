@@ -5,24 +5,13 @@ import prisma from "@repo/db/client";
 
 export const createLecture = async (req: Request, res: Response) => {
   try {
-    // 1️⃣ Check authentication
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-
-    // 2️⃣ Check role
-    if (req.user.role !== "TEACHER") {
-      return res
-        .status(403)
-        .json({ message: "Only teachers can create lectures" });
-    }
-
+    const { role, id } = req.user;
     // 3️⃣ Extract body data
-    const { courseId, title, startTime, endTime } = req.body;
+    const { courseId, title, time } = req.body;
 
-    if (!courseId || !title || !startTime) {
+    if (!courseId || !title || !time) {
       return res.status(400).json({
-        message: "courseId, title, and startTime are required",
+        message: "courseId, title, and time are required",
       });
     }
 
@@ -32,19 +21,39 @@ export const createLecture = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    if (course.teacherId !== req.user.teacherProfileId) {
+    const teacherProfile = await prisma.teacherProfile.findUnique({
+      where: { userId: id },
+    });
+
+    if (!teacherProfile)
+      return res.status(400).json({ message: "You are not a teacher" });
+
+    if (course.teacherId !== teacherProfile.id) {
       return res
         .status(403)
         .json({ message: "You can only create lectures for your own courses" });
     }
 
+    const [hours, minutes] = time.split(":").map(Number);
+
+    // Get today's date
+    const now = new Date();
+    const startTime = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      hours,
+      minutes,
+      0, // seconds
+      0 // milliseconds
+    );
     // 5️⃣ Create lecture
     const lecture = await prisma.lecture.create({
       data: {
-        courseId,
         title,
-        startTime: new Date(startTime),
-        endTime: endTime ? new Date(endTime) : null,
+        startTime,
+        course: { connect: { id: courseId } },
+        status: "NOT_STARTED",
       },
     });
 
@@ -170,9 +179,16 @@ export const deleteLectureById = async (req: Request, res: Response) => {
 
 export const getMyLectures = async (req: Request, res: Response) => {
   try {
+    const { id } = req.user;
+    const teacherProfile = await prisma.teacherProfile.findUnique({
+      where: { userId: id },
+    });
+
+    if (!teacherProfile)
+      return res.status(400).json({ message: "Teacher profile not found" });
     const teacherCourses = await prisma.course.findMany({
       where: {
-        teacherId: req.user!.teacherProfileId,
+        teacherId: teacherProfile.id,
       },
       select: {
         id: true,

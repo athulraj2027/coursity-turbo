@@ -127,7 +127,6 @@ model Lecture {
   courseId        String
   title           String
   startTime       DateTime
-  duration        Int
   status          LectureStatus
   meetingId       String?         @unique
   course          Course          @relation(fields: [courseId], references: [id])

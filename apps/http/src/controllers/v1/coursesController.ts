@@ -75,7 +75,7 @@ const getCourseById = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      data: course,
+      course,
     });
   } catch (error) {
     console.error("Error fetching course:", error);
@@ -393,19 +393,7 @@ export const getMyCoursesForTeachers = async (req: Request, res: Response) => {
 
 //student routes
 export const enrollCourseById = async (req: Request, res: Response) => {
-  try {
-    // 1️⃣ Ensure the user is authenticated
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-
-    // 2️⃣ Ensure the user is a student
-    if (req.user.role !== "STUDENT") {
-      return res
-        .status(403)
-        .json({ message: "Only students can enroll in courses" });
-    }
-
+  try {  
     const { id: courseId } = req.params;
 
     // 3️⃣ Ensure the course exists
