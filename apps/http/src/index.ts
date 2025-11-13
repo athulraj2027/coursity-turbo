@@ -21,7 +21,7 @@ const PORT = 4000;
 app.use(
   cors({
     origin: ["http://localhost:3000"], // your Next.js frontend
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"],
     credentials: true, // if you plan to send cookies or auth headers
   })
 );

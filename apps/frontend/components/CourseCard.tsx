@@ -13,17 +13,16 @@ import { useRouter } from "next/navigation";
 interface CourseCardProps {
   id: string;
   name: string;
-  description: string;
-  price?: number;
+  enrollments: number;
+  lectures: number;
   numberOfClasses?: number;
 }
 
 const CourseCard: React.FC<CourseCardProps> = ({
   id,
   name,
-  description,
-  price,
-  
+  lectures,
+  enrollments,
 }) => {
   const router = useRouter();
 
@@ -37,13 +36,11 @@ const CourseCard: React.FC<CourseCardProps> = ({
         <CardTitle className="text-lg font-semibold truncate group-hover:text-blue-600">
           {name}
         </CardTitle>
-        <CardDescription className="text-sm line-clamp-3 text-gray-500">
-          {description}
-        </CardDescription>
       </CardHeader>
 
       <CardContent className="text-sm text-gray-600 space-y-1">
-        {price !== undefined && <p>💰 Price: ₹{price}</p>}
+        <p>Enrollments : {enrollments}</p>
+        <p>Lectures : {lectures}</p>
       </CardContent>
 
       <CardFooter className="flex justify-end">

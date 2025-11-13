@@ -60,7 +60,7 @@ export default function CoursePage() {
     <SidebarDemo header={header} role="student">
       <div className="p-8 flex flex-col lg:flex-row gap-10">
         {/* Left: Course Details */}
-        <div className="flex-1 bg-white/5 backdrop-blur-md border border-gray-800 rounded-2xl p-8 shadow-sm">
+        <div className="flex-1 bg-white/5 backdrop-blur-md border border-gray-600 rounded-2xl p-8 shadow-sm">
           <h1 className="text-3xl font-bold text-black mb-3">{course.name}</h1>
           <p className="text-black mb-6 leading-relaxed">
             {course.description}
@@ -91,10 +91,12 @@ export default function CoursePage() {
               Enroll Now
             </Button>
           </Link>
+          {/* 💬 Reviews Section */}
+          
         </div>
 
         {/* Right: Extra Info / Sidebar */}
-        <div className="lg:w-80 bg-white/5 backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-sm space-y-6 h-fit">
+        <div className="lg:w-80 bg-white/5 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-sm space-y-6 h-fit">
           <h2 className="text-lg font-semibold text-black">Course Overview</h2>
           <ul className="text-black text-sm list-disc list-inside space-y-2">
             <li>Interactive live classes</li>

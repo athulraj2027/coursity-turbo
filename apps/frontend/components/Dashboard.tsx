@@ -231,8 +231,8 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
         " flex w-full tracking-tighter  flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row dark:border-neutral-700 dark:bg-neutral-800 h-screen"
       )}
     >
-      <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-10">
+      <Sidebar open={open} setOpen={setOpen} >
+        <SidebarBody className="justify-between gap-10 ">
           <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
             {open ? <Logo /> : <LogoIcon />}
             <div className="mt-8 flex flex-col gap-2">
@@ -261,7 +261,7 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
         </SidebarBody>
       </Sidebar>
       <div className="flex flex-1 tracking-tighter  overflow-y-auto">
-        <div className="flex  w-full flex-1 flex-col gap-2  rounded-tl-2xl border border-neutral-200 bg-white p-2 md:p-10 dark:border-neutral-700 dark:bg-neutral-900 mb-5">
+        <div className="flex  w-full flex-1 flex-col gap-2   rounded-tl-2xl border border-neutral-200 bg-white p-2 md:p-10 dark:border-neutral-700 dark:bg-neutral-900 mb-5">
           <h1 className="font-extrabold text-xl sm:text-4xl">{header}</h1>
           {children}
         </div>

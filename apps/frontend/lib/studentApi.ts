@@ -25,3 +25,34 @@ export const fetchCourseDetailsApi = async (id: string) => {
   return data;
 };
 
+export const fetchEnrolledCoursesApi = async () => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/courses/enrolled`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Fetching course failed.");
+  }
+  return data;
+};
+
+export const fetchUpcomingClassesApi = async () => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/lectures/upcoming`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Fetching lectures failed.");
+  }
+  return data;
+};

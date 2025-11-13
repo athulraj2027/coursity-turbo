@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "@repo/db/client";
+import { generateRoomCode } from "../../utils/meetingId";
 
 // teacher routes
 
@@ -73,18 +74,6 @@ export const createLecture = async (req: Request, res: Response) => {
 
 export const editLectureById = async (req: Request, res: Response) => {
   try {
-    // 1️⃣ Authentication check
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-
-    // 2️⃣ Role check
-    if (req.user.role !== "TEACHER") {
-      return res
-        .status(403)
-        .json({ message: "Only teachers can edit lectures" });
-    }
-
     const { id } = req.params;
     const { title, startTime, endTime } = req.body;
 
@@ -111,7 +100,6 @@ export const editLectureById = async (req: Request, res: Response) => {
       data: {
         title: title ?? lecture.title,
         startTime: startTime ? new Date(startTime) : lecture.startTime,
-        endTime: endTime ? new Date(endTime) : lecture.endTime,
       },
     });
 
@@ -130,18 +118,6 @@ export const editLectureById = async (req: Request, res: Response) => {
 
 export const deleteLectureById = async (req: Request, res: Response) => {
   try {
-    // 1️⃣ Authentication check
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-
-    // 2️⃣ Role check
-    if (req.user.role !== "TEACHER") {
-      return res
-        .status(403)
-        .json({ message: "Only teachers can delete lectures" });
-    }
-
     const { id } = req.params;
 
     // 3️⃣ Check if lecture exists
@@ -303,18 +279,6 @@ export const getLectureById = async (req: Request, res: Response) => {
 
 export const getUpcomingLectures = async (req: Request, res: Response) => {
   try {
-    // 1️⃣ Check authentication
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-
-    // 2️⃣ Ensure user is a student
-    if (req.user.role !== "STUDENT") {
-      return res
-        .status(403)
-        .json({ message: "Only students can access upcoming lectures" });
-    }
-
     // 3️⃣ Find student's profile
     const studentProfile = await prisma.studentProfile.findUnique({
       where: { userId: req.user.id },
@@ -383,6 +347,32 @@ export const getUpcomingLectures = async (req: Request, res: Response) => {
   }
 };
 
+export const createMeetingId = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const meetingId = generateRoomCode();
+
+    const updatedLecture = await prisma.lecture.update({
+      where: { id },
+      data: { meetingId },
+    });
+
+    return res.status(200).json({
+      message: "Meeting ID created successfully",
+      meetingId,
+      lecture: updatedLecture,
+      userId: req.user.id,
+    });
+  } catch (error) {
+    console.error("Error creating meetingId:", error);
+    return res.status(500).json({
+      message: "Server error while creating meetingId",
+      error: (error as Error).message,
+    });
+  }
+};
+
 export default {
   createLecture,
   editLectureById,
@@ -390,4 +380,5 @@ export default {
   getMyLectures,
   getLectureById,
   getUpcomingLectures,
+  createMeetingId,
 };

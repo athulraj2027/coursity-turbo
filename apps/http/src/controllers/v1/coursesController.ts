@@ -393,43 +393,32 @@ export const getMyCoursesForTeachers = async (req: Request, res: Response) => {
 
 //student routes
 export const enrollCourseById = async (req: Request, res: Response) => {
-  try {  
+  try {
     const { id: courseId } = req.params;
 
-    // 3️⃣ Ensure the course exists
     const course = await prisma.course.findUnique({
       where: { id: courseId },
-      include: { teacher: true },
+      include: {
+        teacher: { include: { user: true } },
+      },
     });
 
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
+    if (!course) return res.status(404).json({ message: "Course not found" });
 
-    // 4️⃣ Get student profile
     const studentProfile = await prisma.studentProfile.findUnique({
       where: { userId: req.user.id },
     });
 
-    if (!studentProfile) {
+    if (!studentProfile)
       return res.status(400).json({ message: "Student profile not found" });
-    }
 
-    // 5️⃣ Check if already enrolled
     const existingEnrollment = await prisma.enrollment.findFirst({
-      where: {
-        courseId,
-        studentId: studentProfile.id,
-      },
+      where: { courseId, studentId: studentProfile.id },
     });
 
-    if (existingEnrollment) {
-      return res
-        .status(400)
-        .json({ message: "Already enrolled in this course" });
-    }
+    if (existingEnrollment)
+      return res.status(400).json({ message: "Already enrolled" });
 
-    // 6️⃣ Create the enrollment record
     const enrollment = await prisma.enrollment.create({
       data: {
         studentId: studentProfile.id,
@@ -438,13 +427,32 @@ export const enrollCourseById = async (req: Request, res: Response) => {
       },
     });
 
-    return res.status(201).json({
-      message: "Enrolled successfully",
+    const teacherUserId = course.teacher.userId;
+    const coursePrice = course.price;
+
+    // ✅ Update teacher's wallet balance
+    await prisma.user.update({
+      where: { id: teacherUserId },
+      data: { wallet: { increment: coursePrice } },
+    });
+
+    // ✅ Record wallet transaction
+    await prisma.walletTransaction.create({
+      data: {
+        userId: teacherUserId,
+        amount: coursePrice,
+        type: "CREDIT",
+        description: `Student ${req.user.username} enrolled in ${course.name}`,
+      },
+    });
+
+    res.status(201).json({
+      message: "Enrolled successfully, wallet credited",
       enrollment,
     });
   } catch (error) {
     console.error("Error enrolling in course:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Server error during enrollment",
       error,
     });
@@ -456,18 +464,6 @@ export const getEnrolledCoursesForStudents = async (
   res: Response
 ) => {
   try {
-    // 1️⃣ Authentication check
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-
-    // 2️⃣ Role check
-    if (req.user.role !== "STUDENT") {
-      return res
-        .status(403)
-        .json({ message: "Only students can view enrolled courses" });
-    }
-
     // 3️⃣ Get student profile
     const studentProfile = await prisma.studentProfile.findUnique({
       where: { userId: req.user.id },

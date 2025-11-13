@@ -2,6 +2,21 @@ import express from "express";
 const router = express.Router();
 import lecturesController from "../../controllers/v1/lecturesController";
 import { authenticate, authorize } from "../../middlewares/authMiddleware";
+
+router.get(
+  "/upcoming",
+  authenticate,
+  authorize("STUDENT"),
+  lecturesController.getUpcomingLectures
+);
+
+router.get(
+  "/my",
+  authenticate,
+  authorize("TEACHER"),
+  lecturesController.getMyLectures
+);
+
 // teacher routes
 
 router.post(
@@ -22,21 +37,16 @@ router.delete(
   authorize("TEACHER"),
   lecturesController.deleteLectureById
 );
-router.get(
-  "/my",
+
+router.patch(
+  "/:id",
   authenticate,
   authorize("TEACHER"),
-  lecturesController.getMyLectures
+  lecturesController.createMeetingId
 );
 
 // student routes
 
 router.get("/:id", authenticate, lecturesController.getLectureById);
-router.get(
-  "/upcoming",
-  authenticate,
-  authorize("STUDENT"),
-  lecturesController.getUpcomingLectures
-);
 
 export default router;
