@@ -21,7 +21,7 @@ import DummyExplorePage from "@/components/Dummy/DummyExplorePage";
 export default function StudentMainPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [enrollments, setEnrollments] = useState([]);
+  const [enrollments, setEnrollments] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sort, setSort] = useState("");
