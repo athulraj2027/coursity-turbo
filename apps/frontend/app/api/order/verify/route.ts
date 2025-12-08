@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import crypto from "crypto";
@@ -5,12 +7,11 @@ import { cookies } from "next/headers";
 
 const RAZORPAY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 
-const instance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
-
 export async function POST(req: NextRequest) {
+  const instance = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID!,
+    key_secret: process.env.RAZORPAY_KEY_SECRET!,
+  });
   const cookieStore = await cookies();
   const token = cookieStore.get("coursity_token")?.value;
   const {
