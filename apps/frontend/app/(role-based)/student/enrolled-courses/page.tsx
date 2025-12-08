@@ -107,46 +107,47 @@ export default function StudentMainPage() {
 
         {/* Courses Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-          {enrollments.map((enrollment) => {
-            const { course, status, enrolledAt, enrollmentId } = enrollment;
+          {enrollments &&
+            enrollments.map((enrollment) => {
+              const { course, status, enrolledAt, enrollmentId } = enrollment;
 
-            return (
-              <Card
-                key={course.id}
-                className="shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 rounded-2xl"
-              >
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold text-black">
-                    {course.name}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {course.description}
-                  </p>
-                </CardHeader>
+              return (
+                <Card
+                  key={course.id}
+                  className="shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 rounded-2xl"
+                >
+                  <CardHeader>
+                    <CardTitle className="text-xl font-bold text-black">
+                      {course.name}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {course.description}
+                    </p>
+                  </CardHeader>
 
-                <CardContent className="space-y-2 text-sm text-black">
-                  <p>
-                    <strong>Teacher:</strong> {course.teacher.name} (
-                    {course.teacher.email})
-                  </p>
-                  <p>
-                    <strong>Lectures:</strong> {course.lecturesCount}
-                  </p>
-                  <p>
-                    <strong>Status:</strong> {status}
-                  </p>
-                  <p>
-                    <strong>Enrolled On:</strong>{" "}
-                    {new Date(enrolledAt).toLocaleDateString()}
-                  </p>
+                  <CardContent className="space-y-2 text-sm text-black">
+                    <p>
+                      <strong>Teacher:</strong> {course.teacher.name} (
+                      {course.teacher.email})
+                    </p>
+                    <p>
+                      <strong>Lectures:</strong> {course.lecturesCount}
+                    </p>
+                    <p>
+                      <strong>Status:</strong> {status}
+                    </p>
+                    <p>
+                      <strong>Enrolled On:</strong>{" "}
+                      {new Date(enrolledAt).toLocaleDateString()}
+                    </p>
 
-                  <Link href={`/student/enrolled-courses/${enrollmentId}`}>
-                    <Button className="mt-3 w-full">View Stats</Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            );
-          })}
+                    <Link href={`/student/enrolled-courses/${enrollmentId}`}>
+                      <Button className="mt-3 w-full">View Stats</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              );
+            })}
         </div>
 
         {/* Pagination */}
