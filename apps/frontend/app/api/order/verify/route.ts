@@ -10,7 +10,7 @@ const instance = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest) {
   const cookieStore = await cookies();
   const token = cookieStore.get("coursity_token")?.value;
   const {
