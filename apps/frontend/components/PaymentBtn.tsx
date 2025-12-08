@@ -12,7 +12,15 @@ declare global {
   }
 }
 
-const PaymentButton = ({ amount, email, courseId }) => {
+const PaymentButton = ({
+  amount,
+  email,
+  courseId,
+}: {
+  amount: number;
+  email: string;
+  courseId: string;
+}) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,7 +46,7 @@ const PaymentButton = ({ amount, email, courseId }) => {
         const data = await fetch("/api/order/verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials:"include",
+          credentials: "include",
           body: JSON.stringify({
             razorpayPaymentId: response.razorpay_payment_id,
             razorpayOrderId: response.razorpay_order_id,
@@ -62,7 +70,7 @@ const PaymentButton = ({ amount, email, courseId }) => {
     const paymentObject = new window.Razorpay(options);
     paymentObject.open();
 
-    paymentObject.on("payment.failed", function (response) {
+    paymentObject.on("payment.failed", function (response: any) {
       alert("Payment failed. Please try again.");
       setIsLoading(false);
     });

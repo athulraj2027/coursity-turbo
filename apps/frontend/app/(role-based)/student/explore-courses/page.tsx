@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function StudentCoursesPage() {
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -44,7 +44,7 @@ export default function StudentCoursesPage() {
         const data = await fetchAllCoursesApi(page, 10);
         setCourses(data.data || []);
         setTotalPages(data.pagination.totalPages);
-      } catch (error) {
+      } catch (error: any) {
         setError(error.message);
       } finally {
         setLoading(false);

@@ -107,7 +107,7 @@ export default function CheckoutPage() {
               <PaymentButton
                 amount={course.price}
                 email={email}
-                courseId={id}
+                courseId={id as string}
               />
             </div>
           </div>

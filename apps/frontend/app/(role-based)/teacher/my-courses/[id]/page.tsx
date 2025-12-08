@@ -20,7 +20,7 @@ export default function CoursePage() {
     };
     fetchCourse();
   }, [id]);
-  const header = course?.name;
+  const header = "Course details";
   return (
     <SidebarDemo header={header} role="teacher">
       <div className="flex gap-3  bottom-3">

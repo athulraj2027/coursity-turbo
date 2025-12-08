@@ -1,7 +1,15 @@
 import React from "react";
 import { SidebarDemo } from "../Dashboard";
 
-const ErrorFetchingPage = ({ header, role, error }) => {
+const ErrorFetchingPage = ({
+  header,
+  role,
+  error,
+}: {
+  header: string;
+  role: string;
+  error: any;
+}) => {
   return (
     <SidebarDemo header={header} role={role}>
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">

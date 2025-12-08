@@ -1,7 +1,13 @@
 import React from "react";
 import { SidebarDemo } from "../Dashboard";
 
-const DummyExplorePage = ({ header, role }) => {
+const DummyExplorePage = ({
+  header,
+  role,
+}: {
+  header: string;
+  role: string;
+}) => {
   return (
     <SidebarDemo header={header} role={role}>
       <div className="p-6">

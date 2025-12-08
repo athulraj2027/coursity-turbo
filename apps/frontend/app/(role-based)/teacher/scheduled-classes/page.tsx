@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 export default function ScheduledClasses() {
-  const [lectures, setLectures] = useState([]);
+  const [lectures, setLectures] = useState<any[]>([]);
   const [sort, setSort] = useState("");
   const header = "My Lectures";
 

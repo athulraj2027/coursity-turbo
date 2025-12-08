@@ -30,7 +30,7 @@ const CreateLectureForm: React.FC<CreateLectureFormProps> = ({
     try {
       await createLecture(courseId, title, time);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       setError(error.message);
     } finally {
       setLoading(false);
