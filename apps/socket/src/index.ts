@@ -2,6 +2,7 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import events from "./events/index.js";
 
 const app = express();
 app.use(cors());
@@ -15,15 +16,7 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
-
-  socket.on("join-room", (roomId) => {
-    socket.join(roomId);
-    console.log(`User ${socket.id} joined room ${roomId}`);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
+  events(io, socket);
 });
 
-server.listen(4000, () => console.log("Socket server running on port 4000"));
+server.listen(3001, () => console.log("Socket server running on port 3001"));

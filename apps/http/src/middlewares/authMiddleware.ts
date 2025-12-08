@@ -36,13 +36,13 @@ export const authenticate = (
     return res.status(401).json({ message: "No token provided" });
   }
 
-  console.log("Token received for verification:", token);
+  // console.log("Token received for verification:", token);
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthUser;
     req.user = decoded;
     console.log(req.user);
-    console.log("Authenticated user:", req.user);
+    // console.log("Authenticated user:", req.user);
     next();
   } catch (error) {
     console.error("JWT Verification Error:", error);

@@ -14,8 +14,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function TeacherCoursesPage() {
+  const router = useRouter();
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -142,7 +144,11 @@ export default function TeacherCoursesPage() {
 
             <tbody className="divide-y divide-gray-100">
               {courses.map((course, index) => (
-                <tr key={course.id} className="hover:bg-gray-50 transition">
+                <tr
+                  key={course.id}
+                  onClick={() => router.push(`/teacher/my-courses/${course.id}`)}
+                  className="hover:bg-gray-50 transition cursor-pointer"
+                >
                   <td className="px-4 py-3 text-gray-600">
                     {index + 1 + (page - 1) * 10}
                   </td>

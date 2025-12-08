@@ -193,3 +193,22 @@ export const createMeetingId = async (lectureId: string) => {
   }
   return data;
 };
+
+export const verifyEnrollments = async (id: string) => {
+  const params = new URLSearchParams({ meetingId: id });
+
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/enrollments/verify?${params.toString()}`,
+    {
+      method: "POST",
+      credentials: "include",
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "verifying enrollments failed");
+  }
+
+  return data;
+};

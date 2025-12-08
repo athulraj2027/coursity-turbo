@@ -11,11 +11,21 @@ export async function proxy(request: NextRequest) {
 
   const publicPaths = ["/", "/sign-in", "/sign-up", "/verify-otp"];
   const commonPaths = ["/success", "/error"];
+  const isClassPath = pathname.startsWith("/class");
 
   const isPublic = publicPaths.some((path) => pathname === path);
+  const isCommon = commonPaths.some((path) => pathname.startsWith(path));
 
   if (!token && !isPublic) {
     console.log("No token found, redirecting to signin page");
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+
+  if (!token && isCommon) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+
+  if (!token && isClassPath) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
   if (token) {
@@ -26,11 +36,19 @@ export async function proxy(request: NextRequest) {
       const role = decoded.payload.role as string;
       const roleRoute = role.toLowerCase();
 
-      if (token && isPublic) {
+      if (isPublic) {
         return NextResponse.redirect(new URL(`/${roleRoute}`, request.url));
       }
 
-      if (token && !pathname.startsWith(`/${roleRoute}`)) {
+      if (isCommon) {
+        return NextResponse.next();
+      }
+
+      if (isClassPath) {
+        return NextResponse.next();
+      }
+
+      if (!pathname.startsWith(`/${roleRoute}`)) {
         return NextResponse.redirect(new URL("/unauthorized", request.url));
       }
       // if(token)
@@ -52,5 +70,6 @@ export const config = {
     "/teacher/:path*",
     "/student/:path*",
     "/unauthorized",
+    "/class/:path",
   ],
 };

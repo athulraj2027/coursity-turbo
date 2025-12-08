@@ -103,7 +103,12 @@ const verifyOtp = async (req: Request, res: Response) => {
 
     const options: SignOptions = { expiresIn: "7d" };
     const token = jwt.sign(
-      { id: newUser.id, email: newUser.email, role: newUser.role },
+      {
+        id: newUser.id,
+        email: newUser.email,
+        role: newUser.role,
+        name: newUser.username,
+      },
       JWT_SECRET,
       options
     );
@@ -140,7 +145,7 @@ const login = async (req: Request, res: Response) => {
 
     const options: SignOptions = { expiresIn: "7d" };
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: user.id, email: user.email, role: user.role, name: user.username },
       JWT_SECRET,
       options
     );

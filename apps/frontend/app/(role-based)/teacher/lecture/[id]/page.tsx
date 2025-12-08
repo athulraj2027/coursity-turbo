@@ -51,7 +51,7 @@ export default function LectureLandingPage() {
         />
       </div>
 
-      <Link href={`/class/${meetingId}?userId=${userId}`}>
+      <Link href={`/class/${meetingId}`}>
         <Button className="my-8 px-12">Start Lecture</Button>
       </Link>
     </div>

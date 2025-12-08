@@ -4,12 +4,10 @@ import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-// 1️⃣ Load shared env (root)
 dotenv.config();
 
 dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
-// 2️⃣ Load db env (if you keep it separate)
 dotenv.config({ path: path.resolve(__dirname, "../../../packages/db/.env") });
 
 import express from "express";
@@ -20,9 +18,9 @@ const PORT = 4000;
 
 app.use(
   cors({
-    origin: ["http://localhost:3000"], // your Next.js frontend
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"],
-    credentials: true, // if you plan to send cookies or auth headers
+    origin: ["http://localhost:3000"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    credentials: true,
   })
 );
 

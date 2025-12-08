@@ -165,18 +165,20 @@ model Participant {
 }
 
 model Attendance {
-  id              String          @id @default(uuid())
+  id              String   @id @default(uuid())
   lectureId       String
   studentId       String
-  status          AttendanceStatus   @default(PRESENT)
+  status          AttendanceStatus @default(PRESENT)
   joinTime        DateTime?
   leaveTime       DateTime?
   durationMinutes Int?
   markedBy        String?
   markedAt        DateTime?
 
-  lecture         Lecture        @relation(fields: [lectureId], references: [id])
+  lecture         Lecture  @relation(fields: [lectureId], references: [id])
   student         StudentProfile @relation(fields: [studentId], references: [id])
+
+  @@unique([lectureId, studentId])
 }
 
 model Coupon {
