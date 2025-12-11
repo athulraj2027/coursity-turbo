@@ -155,14 +155,17 @@ const CreateCourseForm = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-col-reverse sm:flex-row gap-3 mt-8 pt-6 border-t">
-            <Link href={`/teacher`} className="flex-1 sm:flex-initial">
+            <Link
+              href={`/teacher/my-courses`}
+              className="flex-1 sm:flex-initial"
+            >
               <Button
                 type="button"
                 variant="outline"
                 className="w-full sm:w-32 h-11"
                 disabled={loading}
               >
-                Cancel
+                Go Back
               </Button>
             </Link>
             <Button

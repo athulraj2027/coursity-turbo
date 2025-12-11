@@ -15,15 +15,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import TableDummyComponent from "@/components/TableDummyComponent";
 
 export default function TeacherCoursesPage() {
   const router = useRouter();
   const [courses, setCourses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Changed to true initially
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState("");
   const [sort, setSort] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const header = "My Courses";
 
@@ -44,13 +46,7 @@ export default function TeacherCoursesPage() {
 
     loadCourses();
   }, [page]);
-
-  if (loading)
-    return (
-      <SidebarDemo header={header} role="teacher">
-        <p className="text-center text-gray-500 mt-10">Loading courses...</p>
-      </SidebarDemo>
-    );
+  if (loading) return <TableDummyComponent header={header} />;
 
   if (error)
     return (
@@ -67,6 +63,8 @@ export default function TeacherCoursesPage() {
           <Input
             type="text"
             placeholder="Search courses..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="px-3 py-2 bg-transparent border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 w-[300px] focus:ring-gray-500"
           />
         </div>
@@ -106,9 +104,18 @@ export default function TeacherCoursesPage() {
             variant="ghost"
             onClick={() => {
               setSort("");
+              setSearchQuery("");
             }}
           >
             Clear
+          </Button>
+
+          {/* Create New Course Button */}
+          <Button
+            className="bg-blue-600 text-white hover:bg-blue-700"
+            onClick={() => router.push("/teacher/create-course")}
+          >
+            + New Course
           </Button>
         </div>
       </div>
@@ -146,7 +153,9 @@ export default function TeacherCoursesPage() {
               {courses.map((course, index) => (
                 <tr
                   key={course.id}
-                  onClick={() => router.push(`/teacher/my-courses/${course.id}`)}
+                  onClick={() =>
+                    router.push(`/teacher/my-courses/${course.id}`)
+                  }
                   className="hover:bg-gray-50 transition cursor-pointer"
                 >
                   <td className="px-4 py-3 text-gray-600">

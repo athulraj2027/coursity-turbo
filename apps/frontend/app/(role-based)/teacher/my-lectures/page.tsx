@@ -1,7 +1,10 @@
 "use client";
 
 import { SidebarDemo } from "@/components/Dashboard";
+import { fetchMyScheduledClasses } from "@/lib/api";
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -12,117 +15,83 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import TableDummyComponent from "@/components/TableDummyComponent";
 
-// Dummy coupon data
-const dummyCoupons = [
-  {
-    id: 1,
-    code: "SUMMER2024",
-    discount: 20,
-    type: "percentage",
-    usageLimit: 100,
-    usageCount: 45,
-    expiryDate: "2024-12-31",
-    isActive: true,
-    applicableCourses: 5,
-  },
-  {
-    id: 2,
-    code: "WELCOME50",
-    discount: 50,
-    type: "fixed",
-    usageLimit: 50,
-    usageCount: 38,
-    expiryDate: "2024-11-30",
-    isActive: true,
-    applicableCourses: 3,
-  },
-  {
-    id: 3,
-    code: "FLASH30",
-    discount: 30,
-    type: "percentage",
-    usageLimit: 200,
-    usageCount: 156,
-    expiryDate: "2024-10-15",
-    isActive: false,
-    applicableCourses: 8,
-  },
-  {
-    id: 4,
-    code: "NEWYEAR25",
-    discount: 25,
-    type: "percentage",
-    usageLimit: 150,
-    usageCount: 12,
-    expiryDate: "2025-01-31",
-    isActive: true,
-    applicableCourses: 10,
-  },
-  {
-    id: 5,
-    code: "SPECIAL100",
-    discount: 100,
-    type: "fixed",
-    usageLimit: 20,
-    usageCount: 20,
-    expiryDate: "2024-09-30",
-    isActive: false,
-    applicableCourses: 2,
-  },
-  {
-    id: 6,
-    code: "EARLY15",
-    discount: 15,
-    type: "percentage",
-    usageLimit: 75,
-    usageCount: 28,
-    expiryDate: "2025-02-28",
-    isActive: true,
-    applicableCourses: 6,
-  },
-];
-
-export default function TeacherCouponsPage() {
+export default function ScheduledClasses() {
   const router = useRouter();
-  const [coupons, setCoupons] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true); // FIXED: start with true
+  const [lectures, setLectures] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true); // ✅ FIX: Start with true
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sort, setSort] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const header = "My Coupons";
+  const header = "My Lectures";
   const itemsPerPage = 10;
 
+  const startLecture = async (lectureId: string) => {
+    window.open(`/teacher/lecture/${lectureId}`, "_blank");
+  };
+
   useEffect(() => {
-    setLoading(true);
+    const fetchLectures = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchMyScheduledClasses();
+        setLectures(data.lectures || []);
+        setTotalPages(Math.ceil((data.lectures?.length || 0) / itemsPerPage));
+      } catch (error) {
+        console.error("Failed to fetch lectures:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setTimeout(() => {
-      setCoupons(dummyCoupons);
-      setTotalPages(Math.ceil(dummyCoupons.length / itemsPerPage));
-      setLoading(false);
-    }, 500);
-  }, [page]);
+    fetchLectures();
+  }, []);
 
-  const filteredCoupons = coupons.filter((coupon) =>
-    coupon.code.toLowerCase().includes(searchQuery.toLowerCase())
+  const editLecture = async (lectureId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/teacher/lectures/edit/${lectureId}`);
+  };
+
+  const dltLecture = async (lectureId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      console.log("Delete lecture:", lectureId);
+    } catch (error) {
+      console.error("Failed to delete lecture:", error);
+    }
+  };
+
+  const handleStartLecture = (lectureId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    startLecture(lectureId);
+  };
+
+  const filteredLectures = lectures.filter(
+    (lecture) =>
+      lecture.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lecture.course.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // FIXED: early return same as courses page
+  const paginatedLectures = filteredLectures.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
+
   if (loading) return <TableDummyComponent header={header} />;
 
   return (
     <SidebarDemo header={header} role="teacher">
+      {/* Search and sort */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-white/5 backdrop-blur-md rounded-2xl p-4 mb-6">
         {/* Search */}
         <div className="flex items-center gap-2 flex-1 min-w-[200px]">
           <Input
             type="text"
-            placeholder="Search coupons..."
+            placeholder="Search lectures..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="px-3 py-2 bg-transparent border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 w-[300px] focus:ring-gray-500"
@@ -131,6 +100,7 @@ export default function TeacherCouponsPage() {
 
         {/* Filters & Sort */}
         <div className="flex flex-wrap items-center gap-3">
+          {/* Sort Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="text-sm">
@@ -138,7 +108,7 @@ export default function TeacherCouponsPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48">
-              <DropdownMenuLabel>Sort Coupons</DropdownMenuLabel>
+              <DropdownMenuLabel>Sort Lectures</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuRadioGroup value={sort} onValueChange={setSort}>
                 <DropdownMenuRadioItem value="newest">
@@ -147,19 +117,17 @@ export default function TeacherCouponsPage() {
                 <DropdownMenuRadioItem value="oldest">
                   Oldest
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="highDiscount">
-                  Highest Discount
+                <DropdownMenuRadioItem value="upcoming">
+                  Upcoming First
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="lowDiscount">
-                  Lowest Discount
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="mostUsed">
-                  Most Used
+                <DropdownMenuRadioItem value="status">
+                  By Status
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* Clear Filters */}
           <Button
             className="text-red-600"
             variant="ghost"
@@ -171,17 +139,18 @@ export default function TeacherCouponsPage() {
             Clear
           </Button>
 
+          {/* Create New Lecture */}
           <Button
             className="bg-blue-600 text-white hover:bg-blue-700"
-            onClick={() => router.push("/teacher/my-coupons/create")}
+            onClick={() => router.push("/teacher/lectures/create")}
           >
-            + New Coupon
+            + New Lecture
           </Button>
         </div>
       </div>
 
       <div className="mt-6">
-        {/* Table */}
+        {/* ---------- Table ---------- */}
         <div className="overflow-x-auto border rounded-lg shadow-sm">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
@@ -190,86 +159,92 @@ export default function TeacherCouponsPage() {
                   #
                 </th>
                 <th className="px-4 py-3 text-left font-semibold text-gray-700">
-                  Coupon Code
+                  Lecture Title
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                  Course
                 </th>
                 <th className="px-4 py-3 text-center font-semibold text-gray-700">
-                  Discount
-                </th>
-                <th className="px-4 py-3 text-center font-semibold text-gray-700">
-                  Usage
-                </th>
-                <th className="px-4 py-3 text-center font-semibold text-gray-700">
-                  Expiry Date
-                </th>
-                <th className="px-4 py-3 text-center font-semibold text-gray-700">
-                  Courses
+                  Start Time
                 </th>
                 <th className="px-4 py-3 text-center font-semibold text-gray-700">
                   Status
+                </th>
+                <th className="px-4 py-3 text-center font-semibold text-gray-700">
+                  Actions
                 </th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-gray-100">
-              {filteredCoupons.map((coupon, index) => (
+              {paginatedLectures.map((lecture, index) => (
                 <tr
-                  key={coupon.id}
-                  onClick={() => router.push(`/teacher/coupons/${coupon.id}`)}
+                  key={lecture.id}
+                  onClick={() => router.push(`/teacher/lectures/${lecture.id}`)}
                   className="hover:bg-gray-50 transition cursor-pointer"
                 >
                   <td className="px-4 py-3 text-gray-600">
                     {index + 1 + (page - 1) * itemsPerPage}
                   </td>
                   <td className="px-4 py-3 font-medium text-gray-800">
-                    <span className="font-mono bg-gray-100 px-2 py-1 rounded">
-                      {coupon.code}
-                    </span>
+                    {lecture.title}
                   </td>
-                  <td className="px-4 py-3 text-center text-gray-800">
-                    {coupon.type === "percentage"
-                      ? `${coupon.discount}%`
-                      : `$${coupon.discount}`}
+                  <td className="px-4 py-3 text-gray-600">
+                    {lecture.course.name}
                   </td>
                   <td className="px-4 py-3 text-center text-gray-600">
-                    <span
-                      className={
-                        coupon.usageCount >= coupon.usageLimit
-                          ? "text-red-600 font-semibold"
-                          : ""
-                      }
-                    >
-                      {coupon.usageCount}
-                    </span>
-                    {" / "}
-                    {coupon.usageLimit}
-                  </td>
-                  <td className="px-4 py-3 text-center text-gray-600">
-                    {new Date(coupon.expiryDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3 text-center text-gray-800">
-                    {coupon.applicableCourses}
+                    {format(new Date(lecture.startTime), "MMM d, yyyy • HH:mm")}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        coupon.isActive
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                        lecture.status === "NOT_STARTED"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : lecture.status === "LIVE"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-700"
                       }`}
                     >
-                      {coupon.isActive ? "Active" : "Inactive"}
+                      {lecture.status.replace("_", " ")}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex justify-center gap-2">
+                      <Button
+                        size="sm"
+                        onClick={(e) => handleStartLecture(lecture.id, e)}
+                        className="h-8 px-3 text-xs"
+                      >
+                        Start
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => editLecture(lecture.id, e)}
+                        className="h-8 px-3 text-xs"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={(e) => dltLecture(lecture.id, e)}
+                        className="h-8 px-3 text-xs"
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
 
-              {filteredCoupons.length === 0 && (
+              {paginatedLectures.length === 0 && (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={6}
                     className="text-center py-6 text-gray-500 italic"
                   >
-                    No coupons found
+                    No lectures found
                   </td>
                 </tr>
               )}

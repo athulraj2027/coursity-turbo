@@ -1,12 +1,11 @@
-"use client";
-
 import { SidebarDemo } from "@/components/Dashboard";
+import TeacherDashboard from "@/components/TeacherForms/TeacherDashboard";
 
-export default function StudentMainPage() {
+export default function TeacherDashboardPage() {
   const header = "Dashboard";
   return (
     <SidebarDemo header={header} role="teacher">
-      <div>dsfas</div>
+      <TeacherDashboard />
     </SidebarDemo>
   );
 }

@@ -62,20 +62,20 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
         <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
-    {
-      label: "Settings",
-      href: "/student/settings",
-      icon: (
-        <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
-    {
-      label: "Support",
-      href: "/student/support",
-      icon: (
-        <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
+    // {
+    //   label: "Settings",
+    //   href: "/student/settings",
+    //   icon: (
+    //     <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+    //   ),
+    // },
+    // {
+    //   label: "Support",
+    //   href: "/student/support",
+    //   icon: (
+    //     <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+    //   ),
+    // },
     {
       label: "Wallet",
       href: "/student/wallet",
@@ -108,13 +108,6 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
       ),
     },
     {
-      label: "Create Course",
-      href: "/teacher/create-course",
-      icon: (
-        <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
-    {
       label: "My Coupons",
       href: "/teacher/my-coupons",
       icon: (
@@ -122,8 +115,8 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
       ),
     },
     {
-      label: "Scheduled Classes",
-      href: "/teacher/scheduled-classes",
+      label: "My Lectures",
+      href: "/teacher/my-lectures",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
@@ -142,20 +135,20 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
         <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
-    {
-      label: "Settings",
-      href: "/teacher/settings",
-      icon: (
-        <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
-    {
-      label: "Support",
-      href: "/teacher/support",
-      icon: (
-        <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
+    // {
+    //   label: "Settings",
+    //   href: "/teacher/settings",
+    //   icon: (
+    //     <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+    //   ),
+    // },
+    // {
+    //   label: "Support",
+    //   href: "/teacher/support",
+    //   icon: (
+    //     <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+    //   ),
+    // },
   ];
 
   const adminLinks = [
@@ -231,7 +224,7 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
         " flex w-full tracking-tighter  flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row dark:border-neutral-700 dark:bg-neutral-800 h-screen"
       )}
     >
-      <Sidebar open={open} setOpen={setOpen} >
+      <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10 ">
           <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
             {open ? <Logo /> : <LogoIcon />}
