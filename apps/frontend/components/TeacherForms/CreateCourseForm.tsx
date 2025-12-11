@@ -10,6 +10,7 @@ import Link from "next/link";
 import { validateCreateCourseForm } from "@/lib/validation";
 import { createCourse } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const CreateCourseForm = () => {
   const router = useRouter();
@@ -38,9 +39,11 @@ const CreateCourseForm = () => {
       const data = await createCourse(name, description, date, price);
       console.log("Course created successfully : ", data);
       // toast success
+      toast.success("Course created");
       router.push(`/teacher`);
     } catch (error: any) {
       setError(error.message);
+      toast.error("Failed to create course");
     } finally {
       setLoading(false);
     }
@@ -105,14 +108,13 @@ const CreateCourseForm = () => {
               <div className="flex flex-col sm:flex-row gap-2 w-full justify-start sm:justify-end mt-4">
                 <Button
                   type="submit"
-                  variant="submit"
                   className="flex-1 sm:w-[150px]"
                   disabled={loading}
                 >
                   {loading ? "Creating..." : "Create Course"}
                 </Button>
                 <Link href={`/teacher`} className="flex-1 sm:w-[150px]">
-                  <Button variant="destructive" className="w-full">
+                  <Button variant="ghost" className="w-full">
                     Cancel
                   </Button>
                 </Link>
