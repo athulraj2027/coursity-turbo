@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { validateSigninForm } from "@/lib/validation";
 import { signinUser } from "@/lib/api";
 import Cookies from "js-cookie";
+import { toast } from "sonner";
 
 const SignInCard = () => {
   const router = useRouter();
@@ -38,11 +39,12 @@ const SignInCard = () => {
       setLoading(true);
       const data = await signinUser(email, password);
       console.log("Signed in successfully :", data);
+      toast.success("Signed in successfully");
       const role = data.user.role as string;
       Cookies.set("coursity_token", data.token);
       router.push(`/${role.toLowerCase()}`);
     } catch (err: any) {
-      setError(err.message);
+      setError("Signing in failed. Please try again");
     } finally {
       setLoading(false);
     }

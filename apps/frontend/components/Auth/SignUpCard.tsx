@@ -17,6 +17,7 @@ import { validateSignupForm } from "@/lib/validation";
 import { signupUser } from "@/lib/api";
 import { useSignupStore } from "@/store/signupStore";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { toast } from "sonner";
 
 const SignUpCard = () => {
   const router = useRouter();
@@ -48,9 +49,10 @@ const SignUpCard = () => {
       const data = await signupUser(email);
       setSignupData({ username, email, password, role });
       console.log("✅ Email sent successfully:", data);
+      toast.success("OTP sent successfully");
       router.push(`/verify-otp`);
     } catch (err: any) {
-      setError(err.message);
+      setError("Sending OTP failed. Please try again or later");
     } finally {
       setLoading(false);
     }

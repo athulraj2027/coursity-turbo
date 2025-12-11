@@ -51,9 +51,10 @@ export function InputOTPForm() {
       console.log("Account verified");
       clearSignupData();
       Cookies.set("coursity_token", res.token);
+      toast.success("Account verification successfull");
       router.push(`/${role.toLowerCase()}`);
     } catch (error: any) {
-      setError(error.message);
+      setError("Account creation failed");
     } finally {
       setLoading(false);
     }
