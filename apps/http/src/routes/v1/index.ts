@@ -4,7 +4,6 @@ import courseRouter from "./courses";
 import lecturesRouter from "./lectures";
 import couponsRouter from "./coupons";
 import profileRouter from "./profile";
-import adminRouter from "./admin/index";
 import enrollmentRouter from "./enrollments";
 
 const router = express.Router();
@@ -14,7 +13,6 @@ router.use("/courses", courseRouter);
 router.use("/lectures", lecturesRouter);
 router.use("/coupons", couponsRouter);
 router.use("/profile", profileRouter);
-router.use("/admin", adminRouter);
 router.use("/enrollments", enrollmentRouter);
 
 export default router;

@@ -29,28 +29,28 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
     },
     {
       label: "Explore Courses",
-      href: "/student/explore-courses",
+      href: "/student/explore-courses?sortBy=&search=&page=1",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
       label: "Enrolled Courses",
-      href: "/student/enrolled-courses",
+      href: "/student/enrolled-courses?sortBy=&search=&page=1",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
       label: "Upcoming Classes",
-      href: "/student/upcoming-classes",
+      href: "/student/upcoming-classes?sortBy=&search=&page=1",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
       label: "Homeworks & Assignments",
-      href: "/student/homeworks-assignments",
+      href: "/student/homeworks-assignments?sortBy=&search=&page=1",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
@@ -102,28 +102,28 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
     },
     {
       label: "My Courses",
-      href: "/teacher/my-courses",
+      href: "/teacher/my-courses?sortBy=&search=&page=1",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
       label: "My Coupons",
-      href: "/teacher/my-coupons",
+      href: "/teacher/my-coupons?sortBy=&search=&page=1",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
       label: "My Lectures",
-      href: "/teacher/my-lectures",
+      href: "/teacher/my-lectures?sortBy=&search=&page=1",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
       label: "My Earnings",
-      href: "//teacher/my-earnings",
+      href: "/teacher/my-earnings",
       icon: (
         <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
@@ -161,35 +161,50 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
     },
     {
       label: "Teachers",
-      href: "/admin/teachers",
+      href: "/admin/teachers?sortBy=&search=&page=1",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
       label: "Students",
-      href: "/admin/students",
+      href: "/admin/students?sortBy=&search=&page=1",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
-      label: "Complaints",
-      href: "/admin/complaints",
+      label: "Courses",
+      href: "/admin/courses?sortBy=&search=&page=1",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
+    {
+      label: "Lectures",
+      href: "/admin/lectures?sortBy=&search=&page=1",
+      icon: (
+        <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    // {
+
+    //   label: "Complaints",
+    //   href: "/admin/complaints",
+    //   icon: (
+    //     <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+    //   ),
+    // },
     {
       label: "Verification Requests",
-      href: "/admin/verification-requests",
+      href: "/admin/verification-requests?sortBy=&search=&page=1",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
       label: "Payout Requests",
-      href: "/admin/payout-requests",
+      href: "/admin/payout-requests?sortBy=&search=&page=1",
       icon: (
         <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
@@ -255,7 +270,7 @@ export function SidebarDemo({ children, header, role }: SidebarDemoProps) {
       </Sidebar>
       <div className="flex flex-1 tracking-tighter  overflow-y-auto">
         <div className="flex  w-full flex-1 flex-col gap-2   rounded-tl-2xl border border-neutral-200 bg-white p-2 md:p-10 dark:border-neutral-700 dark:bg-neutral-900 mb-5">
-          <h1 className="font-extrabold text-xl sm:text-4xl">{header}</h1>
+          <h1 className="font-extrabold text-xl sm:text-4xl underline">{header}</h1>
           {children}
         </div>
       </div>

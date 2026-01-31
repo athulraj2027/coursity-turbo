@@ -3,9 +3,7 @@ import React, { useState } from "react";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
+ 
 } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -45,7 +43,7 @@ const CreateCourseForm = () => {
       const data = await createCourse(name, description, date, price);
       console.log("Course created successfully : ", data);
       toast.success("Course created successfully!");
-      router.push(`/teacher`);
+      router.push(`/teacher/my-courses?sortBy=&search=&page=1`);
     } catch (error: any) {
       setError(error.message);
       toast.error("Failed to create course");

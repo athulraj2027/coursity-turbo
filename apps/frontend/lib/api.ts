@@ -77,13 +77,18 @@ export const createCourse = async (
   return data;
 };
 
-export const fetchMyCourses = async (page = 1, limit = 10) => {
+export const fetchMyCourses = async ({
+  page = 1,
+  limit = 6,
+  sort = "",
+  search = "",
+}) => {
   console.log(
     "Requesting:",
-    `${process.env.NEXT_PUBLIC_API_URL}/courses/my?page=${page}&limit=${limit}`
+    `${process.env.NEXT_PUBLIC_API_URL}/courses/my?page=${page}&limit=${limit}&sort=${sort}$search=${search}`
   );
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/courses/my?page=${page}&limit=${limit}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/courses/my?page=${page}&limit=${limit}&sort=${sort}$search=${search}`,
     {
       method: "GET",
       credentials: "include",

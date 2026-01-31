@@ -13,27 +13,22 @@ export const createCoupon = async (req: Request, res: Response) => {
       courseId,
     } = req.body;
 
-    // 👇 Assume user info is extracted via middleware or JWT
     const userId = (req as any).user?.id;
     const userRole = (req as any).user?.role;
 
-    // ✅ Validate user role
     if (!userId || !["ADMIN", "TEACHER"].includes(userRole)) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    // ✅ Validate inputs
     if (!code || !discountType || !discountValue) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // ✅ Check for duplicate code
     const existing = await prisma.coupon.findUnique({ where: { code } });
     if (existing) {
       return res.status(400).json({ message: "Coupon code already exists" });
     }
 
-    // ✅ Create coupon
     const coupon = await prisma.coupon.create({
       data: {
         code,
@@ -68,7 +63,6 @@ export const getCouponById = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Coupon ID is required" });
     }
 
-    // ✅ Find coupon by ID (include related info)
     const coupon = await prisma.coupon.findUnique({
       where: { id },
       include: {
@@ -100,7 +94,6 @@ export const getCouponById = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Coupon not found" });
     }
 
-    // ✅ Return formatted response
     return res.status(200).json({
       message: "Coupon fetched successfully",
       coupon,
@@ -130,7 +123,6 @@ export const editCouponById = async (req: Request, res: Response) => {
     const userId = (req as any).user?.id;
     const userRole = (req as any).user?.role;
 
-    // ✅ Validate
     if (!id) {
       return res.status(400).json({ message: "Coupon ID is required" });
     }
@@ -139,7 +131,6 @@ export const editCouponById = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // ✅ Find existing coupon
     const existingCoupon = await prisma.coupon.findUnique({
       where: { id },
     });
@@ -148,14 +139,12 @@ export const editCouponById = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Coupon not found" });
     }
 
-    // ✅ Authorization: only creator or admin can edit
     if (existingCoupon.createdById !== userId && userRole !== "ADMIN") {
       return res
         .status(403)
         .json({ message: "Not authorized to edit this coupon" });
     }
 
-    // ✅ Prepare update data
     const updateData: any = {};
 
     if (description !== undefined) updateData.description = description;
@@ -193,7 +182,6 @@ export const deleteCouponById = async (req: Request, res: Response) => {
     const userId = (req as any).user?.id;
     const userRole = (req as any).user?.role;
 
-    // ✅ Validate
     if (!id) {
       return res.status(400).json({ message: "Coupon ID is required" });
     }
@@ -202,7 +190,6 @@ export const deleteCouponById = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // ✅ Find existing coupon
     const existingCoupon = await prisma.coupon.findUnique({
       where: { id },
     });
@@ -211,14 +198,12 @@ export const deleteCouponById = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Coupon not found" });
     }
 
-    // ✅ Authorization
     if (existingCoupon.createdById !== userId && userRole !== "ADMIN") {
       return res
         .status(403)
         .json({ message: "Not authorized to delete this coupon" });
     }
 
-    // ✅ Soft delete (mark inactive)
     const deletedCoupon = await prisma.coupon.update({
       where: { id },
       data: {
@@ -245,7 +230,6 @@ export const getMyCouponsForTeachers = async (req: Request, res: Response) => {
     const userId = (req as any).user?.id;
     const userRole = (req as any).user?.role;
 
-    // ✅ Ensure only teachers or admins can use this route
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -254,7 +238,6 @@ export const getMyCouponsForTeachers = async (req: Request, res: Response) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    // ✅ Query params (for pagination/filtering)
     const {
       page = "1",
       limit = "10",
@@ -265,7 +248,6 @@ export const getMyCouponsForTeachers = async (req: Request, res: Response) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const take = parseInt(limit);
 
-    // ✅ Build filters dynamically
     const whereClause: any = {
       createdById: userId,
       deletedAt: null,
@@ -280,7 +262,6 @@ export const getMyCouponsForTeachers = async (req: Request, res: Response) => {
       ];
     }
 
-    // ✅ Fetch data
     const [coupons, totalCount] = await Promise.all([
       prisma.coupon.findMany({
         where: whereClause,
@@ -321,7 +302,6 @@ export const applyCoupon = async (req: Request, res: Response) => {
         .json({ message: "Coupon code and courseId are required" });
     }
 
-    // ✅ 1. Find the coupon
     const coupon = await prisma.coupon.findUnique({
       where: { code },
     });
@@ -330,20 +310,17 @@ export const applyCoupon = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Invalid coupon code" });
     }
 
-    // ✅ 2. Check if coupon is active and not expired
     const now = new Date();
     if (!coupon.isActive || coupon.expiresAt < now) {
       return res.status(400).json({ message: "Coupon expired or inactive" });
     }
 
-    // ✅ 3. Check if the coupon is applicable to this course
     if (coupon.courseId && coupon.courseId !== courseId) {
       return res
         .status(400)
         .json({ message: "Coupon not valid for this course" });
     }
 
-    // ✅ 4. Check if student has already redeemed this coupon
     const alreadyRedeemed = await prisma.couponRedemption.findFirst({
       where: {
         userId,
@@ -357,7 +334,6 @@ export const applyCoupon = async (req: Request, res: Response) => {
         .json({ message: "You have already used this coupon" });
     }
 
-    // ✅ 5. Get course price
     const course = await prisma.course.findUnique({
       where: { id: courseId },
     });
@@ -368,14 +344,12 @@ export const applyCoupon = async (req: Request, res: Response) => {
 
     let finalPrice = course.price;
 
-    // ✅ 6. Apply discount
     if (coupon.discountType === "PERCENTAGE") {
       finalPrice = course.price - (course.price * coupon.discountValue) / 100;
     } else if (coupon.discountType === "FIXED") {
       finalPrice = Math.max(0, course.price - coupon.discountValue);
     }
 
-    // ✅ 7. (Optional) Store redemption attempt — not marking as completed yet
     await prisma.couponRedemption.create({
       data: {
         userId,

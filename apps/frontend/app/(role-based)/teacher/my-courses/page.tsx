@@ -20,7 +20,7 @@ import TableDummyComponent from "@/components/TableDummyComponent";
 export default function TeacherCoursesPage() {
   const router = useRouter();
   const [courses, setCourses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true); // Changed to true initially
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState("");
@@ -34,7 +34,12 @@ export default function TeacherCoursesPage() {
       setLoading(true);
       setError("");
       try {
-        const data = await fetchMyCourses(page, 10);
+        const data = await fetchMyCourses({
+          page,
+          limit: 6,
+          sort,
+          search: searchQuery,
+        });
         setCourses(data.courses);
         setTotalPages(Math.ceil(data.total / data.limit));
       } catch (err: any) {
@@ -45,7 +50,7 @@ export default function TeacherCoursesPage() {
     };
 
     loadCourses();
-  }, [page]);
+  }, [page, sort, searchQuery]);
   if (loading) return <TableDummyComponent header={header} />;
 
   if (error)
@@ -64,7 +69,10 @@ export default function TeacherCoursesPage() {
             type="text"
             placeholder="Search courses..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             className="px-3 py-2 bg-transparent border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 w-[300px] focus:ring-gray-500"
           />
         </div>
@@ -75,7 +83,7 @@ export default function TeacherCoursesPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="text-sm">
-                {sort ? `Sort: ${sort}` : "Sort By"}
+                {sort ? `Sort : ${sort}` : "Sort By"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48">
@@ -94,11 +102,17 @@ export default function TeacherCoursesPage() {
                 <DropdownMenuRadioItem value="highToLow">
                   Price: High to Low
                 </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="enroll-lowToHigh">
+                  Enrollments: High to Low
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="enroll-highToLow">
+                  Enrollments: High to Low
+                </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Clear Filters */}
+          {/* Clear Filters
           <Button
             className="text-red-600"
             variant="ghost"
@@ -108,12 +122,12 @@ export default function TeacherCoursesPage() {
             }}
           >
             Clear
-          </Button>
+          </Button> */}
 
           {/* Create New Course Button */}
           <Button
             className="bg-blue-600 text-white hover:bg-blue-700"
-            onClick={() => router.push("/teacher/create-course")}
+            onClick={() => router.push("/teacher/my-courses/create")}
           >
             + New Course
           </Button>
@@ -164,9 +178,12 @@ export default function TeacherCoursesPage() {
                   <td className="px-4 py-3 font-medium text-gray-800">
                     {course.name}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 truncate max-w-xs">
-                    {course.description}
+                  <td className="px-4 py-3 text-gray-600 max-w-xs">
+                    {course.description.length > 30
+                      ? course.description.slice(0, 30) + "  ..."
+                      : course.description}
                   </td>
+
                   <td className="px-4 py-3 text-center text-gray-800">
                     ${course.price.toLocaleString()}
                   </td>

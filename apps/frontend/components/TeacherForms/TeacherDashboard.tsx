@@ -2,10 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -189,7 +185,6 @@ const TeacherDashboard = () => {
           color="bg-orange-500"
         />
       </div>
-
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="shadow-lg">
@@ -266,30 +261,6 @@ const TeacherDashboard = () => {
                   ))}
                 </Pie>
               </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="w-5 h-5" />
-              Top Performing Courses
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data.courseEnrollments} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis type="number" />
-                <YAxis type="category" dataKey="name" width={150} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="students" fill="#3b82f6" />
-              </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
